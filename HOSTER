@@ -1,0 +1,8 @@
+HOSTER
+
+- MongoDB
+- mongo-express
+- Eve
+
+- Docker container to host static HTML
+- Support for mongoDB + WebFS

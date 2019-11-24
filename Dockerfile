@@ -8,7 +8,7 @@ RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 RUN apt-get update && \
   apt-get install -y --no-install-suggests --no-install-recommends \
     nodejs bash mime-support procps wget python3 python3-pip vim gnupg \
-    supervisor npm && \
+    supervisor npm libmagic && \
   npm install -g npm@latest && \
   rm -rf /var/lib/apt/lists/*
 
@@ -20,7 +20,7 @@ RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
   rm -rf /var/lib/mongodb && \
   mv /etc/mongod.conf /etc/mongod.conf.orig
 
-RUN pip3 install --no-cache-dir flask PyMongo Flask-PyMongo Flask-RESTful waitress
+RUN pip3 install --no-cache-dir flask PyMongo Flask-PyMongo Flask-RESTful waitress python-magic
 
 RUN npm install -g -loglevel info --production mongo-express
 

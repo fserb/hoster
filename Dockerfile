@@ -8,7 +8,7 @@ RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 RUN apt-get update && \
   apt-get install -y --no-install-suggests --no-install-recommends \
     nodejs bash mime-support procps wget python3 python3-pip vim gnupg \
-    supervisor npm libmagic && \
+    supervisor npm libmagic1 && \
   npm install -g npm@latest && \
   rm -rf /var/lib/apt/lists/*
 

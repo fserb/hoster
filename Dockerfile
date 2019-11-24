@@ -1,5 +1,8 @@
 FROM debian:buster
 
+VOLUME /data
+VOLUME /www
+
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 
 RUN apt-get update && \
@@ -27,9 +30,6 @@ ENV SERVER_PATH "/www"
 COPY docker-entrypoint.sh supervisord.conf server.py /app/
 
 WORKDIR /app/
-
-VOLUME /data
-VOLUME /www
 
 # Port for MongoDB
 EXPOSE 27017

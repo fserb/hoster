@@ -28,6 +28,8 @@ ENV SERVER_PATH "/www"
 
 COPY docker-entrypoint.sh supervisord.conf server.py /app/
 
+RUN chmod 777 docker-entrypoint.sh server.py
+
 WORKDIR /app/
 
 # Port for MongoDB

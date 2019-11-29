@@ -1,3 +1,5 @@
 3rdp
 www
 data
+config
+__pycache__

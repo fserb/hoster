@@ -1,0 +1,24 @@
+server {
+  listen 80 default_server;
+
+  root /www;
+  index index.html index.htm index.php;
+
+  server_name _;
+
+  client_max_body_size 0;
+
+  location / {
+    try_files $uri $uri/ /index.html /index.php?$args =404;
+  }
+
+  location ~ \.php$ {
+    include /etc/nginx/fastcgi_params;
+
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+
+    fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+    fastcgi_index index.php;
+  }
+}

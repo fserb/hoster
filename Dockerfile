@@ -1,14 +1,13 @@
 FROM debian:buster
 
-VOLUME /data
-VOLUME /www
-
-RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
-
 RUN apt-get update && \
   apt-get install -y --no-install-suggests --no-install-recommends \
     nodejs bash mime-support procps wget python3 python3-pip vim gnupg \
-    supervisor npm libmagic1 && \
+    supervisor npm libmagic1 nginx php php-fpm bzip2 file geoip-database \
+    libnginx-mod-http-echo libnginx-mod-http-fancyindex libnginx-mod-http-geoip \
+    libnginx-mod-http-uploadprogress php-bz2 php-curl php-dom php-exif \
+    php-gd php-iconv php-intl php-memcached php-posix php-soap php-sockets \
+    php-sqlite3 php-tokenizer php-xml php-xmlreader php-xmlrpc php-zip && \
   npm install -g npm@latest && \
   rm -rf /var/lib/apt/lists/*
 
@@ -24,13 +23,9 @@ RUN pip3 install --no-cache-dir flask PyMongo Flask-PyMongo Flask-RESTful waitre
 
 RUN npm install -g -loglevel info --production mongo-express
 
-ENV SERVER_PATH "/www"
-
-COPY docker-entrypoint.sh supervisord.conf server.py /app/
-
-WORKDIR /app/
-
-RUN chmod 777 docker-entrypoint.sh server.py
+VOLUME /data
+VOLUME /www
+VOLUME /config
 
 # Port for MongoDB
 EXPOSE 27017
@@ -40,5 +35,20 @@ EXPOSE 8081
 
 # Port for server.py
 EXPOSE 5000
+
+# Nginx
+EXPOSE 80
+
+WORKDIR /app/
+
+RUN groupadd -r www && useradd -r -g www www
+
+RUN rm -f /etc/nginx/conf.d/default.conf
+
+ENV SERVER_PATH "/www"
+
+COPY /app /app/
+
+RUN chmod 777 docker-entrypoint.sh server.py
 
 CMD ["./docker-entrypoint.sh"]

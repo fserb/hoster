@@ -30,9 +30,6 @@ VOLUME /config
 # Port for MongoDB
 EXPOSE 27017
 
-# Port for mongo-express
-EXPOSE 8081
-
 # Port for server.py
 EXPOSE 5000
 

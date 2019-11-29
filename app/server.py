@@ -157,14 +157,6 @@ api.add_resource(DB, "/db/<string:db>/<string:collection>", endpoint="collection
 api.add_resource(DB, "/db/<string:db>/<string:collection>/<string:id>", endpoint="id")
 api.add_resource(FS, "/fs/<path:path>", endpoint="fs")
 
-@app.route('/')
-def index():
-  return send_from_directory(app.static_folder, 'index.html')
-
-@app.route('/<path:path>')
-def send(path):
-  return send_from_directory(app.static_folder, path)
-
 if __name__ =='__main__':
   serve(app, host='0.0.0.0', port=5000)
 

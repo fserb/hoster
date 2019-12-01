@@ -1,5 +1,5 @@
 server {
-  listen 80 default_server;
+  listen 5000 default_server;
 
   root /www;
   index index.html index.htm index.php;

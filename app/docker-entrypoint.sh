@@ -4,9 +4,6 @@ set -ex
 
 echo "Hoster"
 
-mkdir -p /data/db /data/configdb
-chown -R mongodb:mongodb /data/db /data/configdb
-
 mkdir -p /config/nginx/site-confs /var/lib/nginx /var/tmp/nginx
 
 [[ ! -f /config/nginx/nginx.conf ]] && \

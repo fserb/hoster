@@ -2,26 +2,14 @@ server {
   listen 5000 default_server;
 
   root /www;
-  index index.html index.htm index.php;
+  index index.html index.htm;
 
   server_name _;
 
   client_max_body_size 0;
 
   location / {
-    try_files $uri $uri/ /index.html /index.php?$args =404;
-  }
-
-  location ~ \.php$ {
-    include /etc/nginx/fastcgi_params;
-
-    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-
-    fastcgi_hide_header X-Frame-Options;
-
-    fastcgi_pass unix:/run/php/php7.3-fpm.sock;
-    fastcgi_index index.php;
+    try_files $uri $uri/ /index.htm /index.html =404;
   }
 
   location ~ /_fs/ {
@@ -30,4 +18,12 @@ server {
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
   }
+
+  location ~ /_git/ {
+    proxy_pass http://localhost:5001;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Ral-IP $remote_addr;
+  }
+
 }

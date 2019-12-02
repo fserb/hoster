@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
   apt-get install -y --no-install-suggests --no-install-recommends \
     bash mime-support procps wget python3 python3-pip emacs-nox gnupg less \
-    supervisor libmagic1 nginx php php-fpm bzip2 file geoip-database \
+    libmagic1 nginx php php-fpm bzip2 file geoip-database \
     python3-pygit2 \
     libnginx-mod-http-echo libnginx-mod-http-fancyindex libnginx-mod-http-geoip \
     libnginx-mod-http-uploadprogress \
@@ -14,7 +14,7 @@ RUN apt-get update && \
     php-xmlreader php-xmlrpc php-zip && \
   rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --no-cache-dir flask Flask-RESTful waitress python-magic
+RUN pip3 install --no-cache-dir supervisor flask Flask-RESTful waitress python-magic
 
 VOLUME /data
 VOLUME /repo

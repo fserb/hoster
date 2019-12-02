@@ -1,9 +1,12 @@
 FROM debian:buster
 
+ENV DEBIAN_FRONTEND noninteractive
+
 RUN apt-get update && \
   apt-get install -y --no-install-suggests --no-install-recommends \
     bash mime-support procps wget python3 python3-pip emacs-nox gnupg less \
     supervisor libmagic1 nginx php php-fpm bzip2 file geoip-database \
+    python3-pygit2 \
     libnginx-mod-http-echo libnginx-mod-http-fancyindex libnginx-mod-http-geoip \
     libnginx-mod-http-uploadprogress \
     php-bz2 php-curl php-dom php-exif php-gd php-iconv php-intl php-memcached \
@@ -14,6 +17,7 @@ RUN apt-get update && \
 RUN pip3 install --no-cache-dir flask Flask-RESTful waitress python-magic
 
 VOLUME /data
+VOLUME /repo
 VOLUME /www
 VOLUME /config
 
@@ -27,6 +31,7 @@ RUN groupadd -r www && useradd -r -g www www
 RUN rm -f /etc/nginx/conf.d/default.conf
 
 ENV SERVER_PATH "/www"
+ENV SERVER_REPO_PATH "/repo"
 
 COPY /app /app/
 

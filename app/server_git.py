@@ -95,9 +95,9 @@ class GIT(flask_restful.Resource):
 
       git = pygit2.Repository(repo)
       head = git.lookup_reference("refs/heads/master").target
-      git.reset(head, pygit2.GIT_RESET_SOFT)
-
       commit = git[head]
+      git.branches['working'].set_target(commit)
+
       out = []
       git_auto_list(git, commit.tree, "", out)
       print(sorted(out))

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+docker exec -it hoster.test bash -c "rm -rf /repo/test"
+
+if [ "$(lib/fetch GET test)" = "[]" ]; then
+  echo "READY"
+else
+  echo "FAIL"
+fi
+

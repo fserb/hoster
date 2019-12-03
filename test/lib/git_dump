@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# check if working and master are pointing to the same commit
+if [ "$(git --git-dir tmp/repo/test rev-parse refs/heads/master)" = "$(git --git-dir tmp/repo/test rev-parse refs/heads/working)" ]; then
+  echo "master == working"
+else
+  echo "master != working"
+fi
+
+for branch in $(git --git-dir tmp/repo/test for-each-ref --format='%(refname)'); do
+  echo $branch `git --git-dir tmp/repo/test rev-parse $branch^{tree}`
+  git --git-dir tmp/repo/test ls-tree --full-tree -r -l $branch
+done

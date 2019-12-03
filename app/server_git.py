@@ -99,8 +99,10 @@ class GIT(flask_restful.Resource):
       head = git.lookup_reference("refs/heads/master").target
       commit = git[head]
 
-      if git.branches['working'].target != head:
-        git.branches['working'].delete()
+      if 'working' in git.branches:
+        if git.branches['working'].target != head:
+          git.branches['working'].delete()
+      if not 'working' in git.branches:
         git.branches.local.create("working", commit)
 
       out = []
@@ -183,8 +185,9 @@ class GIT(flask_restful.Resource):
         '', commitw.tree.id, [head])
 
     if git.branches['working'].target != head:
+      head = git.lookup_reference("refs/heads/master").target
       git.branches['working'].delete()
-      git.branches.local.create("working", git[commit])
+      git.branches.local.create("working", git[head])
 
     return make_response("OK")
 

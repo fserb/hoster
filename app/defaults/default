@@ -4,12 +4,17 @@ server {
   root /www;
   index index.html index.htm;
 
+  autoindex on;
+
   server_name _;
 
   client_max_body_size 0;
 
   location / {
     try_files $uri $uri/ /index.htm /index.html =404;
+
+    add_header Cache-Control no-cache;
+    expires 1s;
   }
 
   location ~ /_fs/ {

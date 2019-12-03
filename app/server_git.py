@@ -96,7 +96,9 @@ class GIT(flask_restful.Resource):
       git = pygit2.Repository(repo)
       head = git.lookup_reference("refs/heads/master").target
       commit = git[head]
-      git.branches['working'].set_target(commit)
+      print(head, commit, git.branches['working'].target)
+      if git.branches['working'].target != head:
+        git.branches['working'].set_target(commit)
 
       out = []
       git_auto_list(git, commit.tree, "", out)
@@ -166,13 +168,14 @@ class GIT(flask_restful.Resource):
 
     head = git.lookup_reference("refs/heads/master").target
 
-    commit = git.create_commit('refs/heads/master',
-      pygit2.Signature("POST " + request.full_path, request.remote_addr + "@hoster"),
-      pygit2.Signature("hoster", "@hoster"),
-      '', commitw.tree.id, [head])
+    if commitw.tree != git[head].tree:
+      commit = git.create_commit('refs/heads/master',
+        pygit2.Signature("POST " + request.full_path, request.remote_addr + "@hoster"),
+        pygit2.Signature("hoster", "@hoster"),
+        '', commitw.tree.id, [head])
 
-    git.branches['working'].set_target(commit)
-
+    if git.branches['working'].target != head:
+      git.branches['working'].set_target(commit)
 
   def delete(self, repo, path):
     repo = os.path.join(SERVER_REPO_PATH, repo)

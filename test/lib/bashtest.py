@@ -139,6 +139,7 @@ def main():
         fake_module = types.ModuleType(file, res)
         fake_module.run = _fake_module_run
         for test in finder.find(fake_module, file):
+            print(file)
             runner.run(test)
 
     runner.summarize(verbose=not args.quiet)

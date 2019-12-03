@@ -96,13 +96,13 @@ class GIT(flask_restful.Resource):
       git = pygit2.Repository(repo)
       head = git.lookup_reference("refs/heads/master").target
       commit = git[head]
-      print(head, commit, git.branches['working'].target)
+
       if git.branches['working'].target != head:
         git.branches['working'].set_target(commit)
 
       out = []
       git_auto_list(git, commit.tree, "", out)
-      print(sorted(out))
+
       res = make_response(jsonify(out))
       res.headers['Content-Type'] = 'application/json; charset=utf-8'
       return res

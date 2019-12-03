@@ -1,0 +1,9 @@
+METHOD="$1"
+PATH="$2"
+DATA="$3"
+
+exec /usr/bin/curl \
+  --silent --show-error \
+  --request $METHOD \
+  --data "$DATA" \
+  "http://localhost:5666/_git/$PATH"

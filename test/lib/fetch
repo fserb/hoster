@@ -1,9 +1,20 @@
+#!/bin/bash
+
 METHOD="$1"
 PATH="$2"
 DATA="$3"
 
-exec /usr/bin/curl \
+exec 3>&1
+
+HTTP_STATUS=$(/usr/bin/curl \
   --silent --show-error \
   --request $METHOD \
   --data "$DATA" \
-  "http://localhost:5666/_git/$PATH"
+  --write-out "%{http_code}" \
+  --output >(/bin/cat >&3) \
+  "http://localhost:5666/_git/$PATH")
+
+if [ "$HTTP_STATUS" != "200" ]; then
+  echo
+  echo "HTTP code: $HTTP_STATUS"
+fi

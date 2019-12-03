@@ -24,7 +24,10 @@ until [ "$(curl -s http://localhost:5666/_fs/anything)" = "/anything: No such fi
 done
 
 echo "Running tests..."
-lib/bashtest.py tests/*
+if ! lib/bashtest.py tests/*; then
+  docker exec -it hoster.test cat /var/log/supervisor/server_stdout.log
+  exit 1
+fi
 
 echo "Shutting down..."
 docker rm -f hoster.test || true

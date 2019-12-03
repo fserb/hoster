@@ -40,6 +40,8 @@ def git_auto_insert(git, treebuilder, path, thing, mode):
 def git_auto_delete(git, treebuilder, path):
   path_parts = path.split('/', 1)
   if len(path_parts) == 1:
+    if not treebuilder.get(path):
+      return None
     treebuilder.remove(path)
     return treebuilder.write()
 
@@ -98,7 +100,8 @@ class GIT(flask_restful.Resource):
       commit = git[head]
 
       if git.branches['working'].target != head:
-        git.branches['working'].set_target(commit)
+        git.branches['working'].delete()
+        git.branches.local.create("working", commit)
 
       out = []
       git_auto_list(git, commit.tree, "", out)
@@ -111,11 +114,14 @@ class GIT(flask_restful.Resource):
       return make_response('/%s: Unknown repo.' % repo, 404)
 
     git = pygit2.Repository(repo)
-    head = git.lookup_reference("refs/heads/working").target
+    head = git.lookup_reference("refs/heads/master").target
     commit = git[head]
 
-    entry = git_auto_get(git, commit.tree, path)
-    blob = git[entry.id]
+    try:
+      entry = git_auto_get(git, commit.tree, path)
+      blob = git[entry.id]
+    except KeyError:
+      return make_response('/%s: file does not exist.' % path, 404)
 
     mime = magic.from_buffer(blob.data)
     if mime is None:
@@ -175,7 +181,8 @@ class GIT(flask_restful.Resource):
         '', commitw.tree.id, [head])
 
     if git.branches['working'].target != head:
-      git.branches['working'].set_target(commit)
+      git.branches['working'].delete()
+      git.branches.local.create("working", git[commit])
 
   def delete(self, repo, path):
     repo = os.path.join(SERVER_REPO_PATH, repo)
@@ -186,6 +193,9 @@ class GIT(flask_restful.Resource):
 
     tb = git.TreeBuilder(commit.tree)
     tree = git_auto_delete(git, tb, path)
+    if not tree:
+      return make_response('/%s: file not found.' % path, 404)
+
     wt = git.lookup_reference("refs/heads/working").target
 
     git.create_commit('refs/heads/working',

@@ -159,6 +159,8 @@ class GIT(flask_restful.Resource):
       pygit2.Signature("hoster", "@hoster"),
       '', tree, [wt])
 
+    return make_response("OK")
+
 
   def post(self, repo, path=None):
     if path:
@@ -184,6 +186,9 @@ class GIT(flask_restful.Resource):
       git.branches['working'].delete()
       git.branches.local.create("working", git[commit])
 
+    return make_response("OK")
+
+
   def delete(self, repo, path):
     repo = os.path.join(SERVER_REPO_PATH, repo)
 
@@ -202,4 +207,7 @@ class GIT(flask_restful.Resource):
       pygit2.Signature("DELETE " + request.full_path, request.remote_addr + "@hoster"),
       pygit2.Signature("hoster", "@hoster"),
       '', tree, [wt])
+
+    return make_response("OK")
+
 

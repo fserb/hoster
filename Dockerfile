@@ -1,19 +1,28 @@
-FROM debian:buster
+FROM debian:bullseye-slim
+LABEL maintainer "Fernando Serboncini <fserb@fserb.com>"
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV LANG C.UTF-8
 
 RUN apt-get update && \
   apt-get install -y --no-install-suggests --no-install-recommends \
-    bash mime-support procps wget python3 python3-pip emacs-nox gnupg less \
-    libmagic1 nginx bzip2 file geoip-database python3-pygit2 git \
-    libnginx-mod-http-echo libnginx-mod-http-fancyindex libnginx-mod-http-geoip \
-    libnginx-mod-http-uploadprogress && \
+    mime-support python3 python3-pip gnupg \
+    libmagic1 nginx bzip2 file python3-pygit2 \
+    libnginx-mod-http-fancyindex && \
+  rm -f /etc/nginx/conf.d/default.conf && \
   rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir setuptools supervisor flask Flask-RESTful waitress python-magic
 
+ARG BUILD_ENV
+RUN if [ "${BUILD_ENV}" = "dev" ]; then apt-get update && \
+  apt-get install -y bash procps wget emacs-nox less git ; fi
+
+# Path that will contain git repositories
 VOLUME /repo
+# Path statically served
 VOLUME /www
+# Persistent config (nginx)
 VOLUME /config
 
 # Nginx
@@ -22,8 +31,6 @@ EXPOSE 5000
 WORKDIR /app/
 
 RUN groupadd -r www && useradd -r -g www www
-
-RUN rm -f /etc/nginx/conf.d/default.conf
 
 ENV SERVER_PATH "/www"
 ENV SERVER_REPO_PATH "/repo"

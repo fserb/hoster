@@ -8,7 +8,7 @@ rm -rf tmp
 mkdir -p tmp/repo
 
 echo "Building docker image..."
-docker build -q -t fserb/hoster.test ..
+docker build --build-arg BUILD_ENV=dev -q -t fserb/hoster.test ..
 
 echo "Starting docker..."
 docker rm -f hoster.test 2> /dev/null || true

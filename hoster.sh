@@ -4,7 +4,7 @@ set -e
 
 rm -rf config/*
 
-docker build --build-arg BUILD_ENV=dev -q -t fserb/hoster.dev .
+docker build --build-arg BUILD_ENV=dev -t fserb/hoster.dev .
 
 exec docker run --rm --name hoster \
   -p 5000:5000 \

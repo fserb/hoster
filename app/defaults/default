@@ -17,18 +17,24 @@ server {
     expires 1s;
   }
 
-  location ~ /_fs/ {
+  location ~ ^/_fs/ {
     proxy_pass http://localhost:5001;
 
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
   }
 
-  location ~ /_git/ {
+  location ~ ^/_git/ {
     proxy_pass http://localhost:5001;
 
     proxy_set_header Host $host;
     proxy_set_header X-Ral-IP $remote_addr;
   }
 
+  location ~ /cgi/ {
+    include /etc/nginx/fastcgi_params;
+    fastcgi_param DOCUMENT_ROOT \$document_root;
+
+    fastcgi_pass unix:/run/lock/fcgiwrap.sock;
+  }
 }

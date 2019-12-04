@@ -7,9 +7,10 @@ ENV LANG C.UTF-8
 RUN apt-get update && \
   apt-get install -y --no-install-suggests --no-install-recommends \
     mime-support python3 python3-pip gnupg \
-    libmagic1 nginx bzip2 file python3-pygit2 \
+    libmagic1 nginx bzip2 file python3-pygit2 fcgiwrap \
     libnginx-mod-http-fancyindex && \
   rm -f /etc/nginx/conf.d/default.conf && \
+  rm -rf /usr/share/doc && \
   rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir setuptools supervisor flask Flask-RESTful waitress python-magic
@@ -29,8 +30,6 @@ VOLUME /config
 EXPOSE 5000
 
 WORKDIR /app/
-
-RUN groupadd -r www && useradd -r -g www www
 
 ENV SERVER_PATH "/www"
 ENV SERVER_REPO_PATH "/repo"

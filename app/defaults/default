@@ -5,6 +5,7 @@ server {
   index index.html index.htm;
 
   autoindex on;
+  port_in_redirect off;
 
   server_name _;
 

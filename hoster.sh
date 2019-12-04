@@ -4,11 +4,11 @@ set -e
 
 rm -rf config/*
 
-docker build -t fserb/hoster .
+docker build --build-arg BUILD_ENV=dev -q -t fserb/hoster.dev .
 
-docker run --rm --name hoster \
+exec docker run --rm --name hoster \
   -p 5000:5000 \
   -v $(pwd)/www:/www \
   -v $(pwd)/repo:/repo \
   -v $(pwd)/config:/config \
-  -t fserb/hoster
+  -t fserb/hoster.dev

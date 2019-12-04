@@ -8,7 +8,7 @@ rm -rf tmp
 mkdir -p tmp/repo
 
 echo "Building docker image..."
-docker build --build-arg BUILD_ENV=dev -q -t fserb/hoster.test ..
+docker build --build-arg BUILD_ENV=dev -q -t fserb/hoster.dev ..
 
 echo "Starting docker..."
 docker rm -f hoster.test 2> /dev/null || true
@@ -16,7 +16,7 @@ docker run --rm \
   --name hoster.test \
   -p 5666:5000 \
   -v $(pwd)/tmp/repo:/repo \
-  -t fserb/hoster.test &
+  -t fserb/hoster.dev &
 
 echo "Waiting for docker to respond..."
 until [ "$(curl -s http://localhost:5666/_fs/anything)" = "/anything: No such file or directory." ]; do

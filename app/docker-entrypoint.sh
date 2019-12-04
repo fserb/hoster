@@ -2,12 +2,12 @@
 
 cat <<EOF
 
-  _               _
- | |             | |
- | |__   ___  ___| |_ ___ _ __
- | '_ \ / _ \/ __| __/ _ \ '__|
- | | | | (_) \__ \ ||  __/ |
- |_| |_|\___/|___/\__\___|_|
+||     _               _
+||    | |             | |
+||    | |__   ___  ___| |_ ___ _ __
+||    | '_ \ / _ \/ __| __/ _ \ '__|
+||    | | | | (_) \__ \ ||  __/ |
+||    |_| |_|\___/|___/\__\___|_|
 
 EOF
 
@@ -25,5 +25,6 @@ mkdir -p /config/nginx/site-confs /var/lib/nginx /var/tmp/nginx /var/log/supervi
 
 chown -R www:www /config /var/lib/nginx /var/tmp/nginx /run/lock
 chmod -R g+w /config/nginx
+rm -rf /run/lock/fcgiwrap.sock
 
 PYTHONUNBUFFERED=1 exec supervisord -c ./supervisord.conf

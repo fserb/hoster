@@ -1,15 +1,19 @@
 #!/bin/bash
 
-for branch in $(git --git-dir tmp/repo/test for-each-ref --format='%(refname)'); do
-  if [ "$branch" != "refs/heads/master" ]; then
-    if [ "$(git --git-dir tmp/repo/test rev-parse refs/heads/master)" = "$(git --git-dir tmp/repo/test rev-parse $branch)" ]; then
-      echo $branch "== master"
+docker exec -i hoster.test bash << EOF
+
+for branch in \$(git --git-dir /repo/test for-each-ref --format='%(refname)'); do
+  if [ "\$branch" != "refs/heads/master" ]; then
+    if [ "\$(git --git-dir /repo/test rev-parse refs/heads/master)" = "\$(git --git-dir /repo/test rev-parse \$branch)" ]; then
+      echo \$branch "== master"
       continue
     fi
   fi
 
-  echo $branch \
-    `git --git-dir tmp/repo/test log --oneline $branch | wc -l` \
-    `git --git-dir tmp/repo/test rev-parse $branch^{tree}`
-  git --git-dir tmp/repo/test ls-tree --full-tree -r -l $branch
+  echo \$branch \
+    \$(git --git-dir /repo/test log --oneline \$branch | wc -l) \
+    \$(git --git-dir /repo/test rev-parse \$branch^{tree})
+  git --git-dir /repo/test ls-tree --full-tree -r -l \$branch
 done
+
+EOF

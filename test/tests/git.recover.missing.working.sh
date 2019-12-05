@@ -1,10 +1,10 @@
 $ lib/git_reset
 READY
 
-$ lib/fetch PUT test/a.txt "example file"
+$ lib/fetch PUT _git/test/a.txt "example file"
 OK
 
-$ lib/fetch POST test
+$ lib/fetch POST _git/test
 OK
 
 $ lib/git_dump
@@ -18,5 +18,5 @@ $ lib/git_dump
 refs/heads/master 2 497eb728207ae4220c1d5cfdbf94f5cdca39bebb
 100644 blob 7897add7ea3c9519db025c1b917ac8d8df3fe17f      12        a.txt
 
-$ lib/fetch GET test
+$ lib/fetch GET _git/test
 ["a.txt"]

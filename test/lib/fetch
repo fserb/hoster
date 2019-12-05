@@ -12,7 +12,7 @@ HTTP_STATUS=$(/usr/bin/curl \
   --data "$DATA" \
   --write-out "%{http_code}" \
   --output >(/bin/cat >&3) \
-  "http://localhost:5666/_git/$PATH")
+  "http://localhost:5666/$PATH")
 
 if [ "$HTTP_STATUS" != "200" ]; then
   echo

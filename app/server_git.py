@@ -2,8 +2,8 @@ import os
 import functools
 
 import pygit2
-from flask import send_from_directory, request, jsonify, make_response, Response, stream_with_context
-import flask_restful
+from flask import Blueprint, send_from_directory, request, jsonify, \
+  make_response, Response, stream_with_context
 import magic
 
 """
@@ -18,6 +18,8 @@ POST repo/ - commit repo
 """
 
 SERVER_REPO_PATH = os.getenv("SERVER_REPO_PATH", "repo")
+
+server_git = Blueprint('server_git', __name__)
 
 def git_auto_insert(git, treebuilder, path, thing, mode):
   path_parts = path.split('/', 1)
@@ -77,140 +79,140 @@ def git_auto_list(git, tree, path, out):
       git_auto_list(git, git[e.id], path + e.name + "/", out)
 
 
-class GIT(flask_restful.Resource):
-  def head(self, repo, path):
-    return self.get(path)
+@server_git.route('/_git/<string:repo>', methods=['HEAD', 'GET'])
+def get_repo(repo):
+  repo = os.path.join(SERVER_REPO_PATH, repo)
 
-  def get(self, repo, path=None):
-    repo = os.path.join(SERVER_REPO_PATH, repo)
-
-    if not path: # full repo info
-      if not os.path.isdir(repo):
-        pygit2.init_repository(repo, bare=True)
-        git = pygit2.Repository(repo)
-        tree = git.TreeBuilder().write()
-        commit = git.create_commit('refs/heads/master',
-          pygit2.Signature("GET " + request.full_path, request.remote_addr + "@hoster"),
-          pygit2.Signature("hoster", "@hoster"),
-          'repo init', tree, [])
-        git.branches.local.create("working", git[commit])
-
-      git = pygit2.Repository(repo)
-      head = git.lookup_reference("refs/heads/master").target
-      commit = git[head]
-
-      if 'working' in git.branches:
-        if git.branches['working'].target != head:
-          git.branches['working'].delete()
-      if not 'working' in git.branches:
-        git.branches.local.create("working", commit)
-
-      out = []
-      git_auto_list(git, commit.tree, "", out)
-
-      res = make_response(jsonify(out))
-      res.headers['Content-Type'] = 'application/json; charset=utf-8'
-      return res
-
-    if not os.path.isdir(repo):
-      return make_response('/%s: Unknown repo.' % repo, 404)
-
+  if not os.path.isdir(repo):
+    pygit2.init_repository(repo, bare=True)
     git = pygit2.Repository(repo)
-    head = git.lookup_reference("refs/heads/master").target
-    commit = git[head]
-
-    try:
-      entry = git_auto_get(git, commit.tree, path)
-      blob = git[entry.id]
-    except KeyError:
-      return make_response('/%s: file does not exist.' % path, 404)
-
-    mime = magic.from_buffer(blob.data)
-    if mime is None:
-        mime = 'application/octet-stream'
-    else:
-        mime = mime.replace(' [ [', '')
-    res = make_response(blob.data)
-    res.headers['Content-Type'] = mime
-    return res
-
-
-  def put(self, repo, path):
-    repo = os.path.join(SERVER_REPO_PATH, repo)
-    if not os.path.isdir(repo):
-      return make_response('/%s: Unknown repo.' % repo, 404)
-
-    git = pygit2.Repository(repo)
-    head = git.lookup_reference("refs/heads/working").target
-    commit = git[head]
-
-    data = request.get_data()
-    encoding = request.args.get('encoding', '')
-    if encoding == 'base64':
-        data = data.decode('base64')
-
-    id = git.create_blob(data)
-    blob = git[id]
-
-    tb = git.TreeBuilder(commit.tree)
-    tree = git_auto_insert(git, tb, path, id, pygit2.GIT_FILEMODE_BLOB)
-    wt = git.lookup_reference("refs/heads/working").target
-
-    git.create_commit('refs/heads/working',
-      pygit2.Signature("PUT " + request.full_path, request.remote_addr + "@hoster"),
+    tree = git.TreeBuilder().write()
+    commit = git.create_commit('refs/heads/master',
+      pygit2.Signature("GET " + request.full_path, request.remote_addr + "@hoster"),
       pygit2.Signature("hoster", "@hoster"),
-      '', tree, [wt])
+      'repo init', tree, [])
+    git.branches.local.create("working", git[commit])
 
-    return make_response("OK")
+  git = pygit2.Repository(repo)
+  head = git.lookup_reference("refs/heads/master").target
+  commit = git[head]
 
-
-  def post(self, repo, path=None):
-    if path:
-      return make_response('Invalid POST with path', 404)
-
-    repo = os.path.join(SERVER_REPO_PATH, repo)
-    if not os.path.isdir(repo):
-      return make_response('/%s: Unknown repo.' % repo, 404)
-
-    git = pygit2.Repository(repo)
-    headw = git.lookup_reference("refs/heads/working").target
-    commitw = git[headw]
-
-    head = git.lookup_reference("refs/heads/master").target
-
-    if commitw.tree != git[head].tree:
-      commit = git.create_commit('refs/heads/master',
-        pygit2.Signature("POST " + request.full_path, request.remote_addr + "@hoster"),
-        pygit2.Signature("hoster", "@hoster"),
-        '', commitw.tree.id, [head])
-
+  if 'working' in git.branches:
     if git.branches['working'].target != head:
-      head = git.lookup_reference("refs/heads/master").target
       git.branches['working'].delete()
-      git.branches.local.create("working", git[head])
+  if not 'working' in git.branches:
+    git.branches.local.create("working", commit)
 
-    return make_response("OK")
+  out = []
+  git_auto_list(git, commit.tree, "", out)
+
+  res = make_response(jsonify(out))
+  res.headers['Content-Type'] = 'application/json; charset=utf-8'
+  return res
 
 
-  def delete(self, repo, path):
-    repo = os.path.join(SERVER_REPO_PATH, repo)
+@server_git.route('/_git/<string:repo>/<path:path>', methods=['HEAD', 'GET'])
+def get_path(repo, path):
+  repo = os.path.join(SERVER_REPO_PATH, repo)
 
-    git = pygit2.Repository(repo)
-    head = git.lookup_reference("refs/heads/working").target
-    commit = git[head]
+  if not os.path.isdir(repo):
+    return make_response('/%s: Unknown repo.' % repo, 404)
 
-    tb = git.TreeBuilder(commit.tree)
-    tree = git_auto_delete(git, tb, path)
-    if not tree:
-      return make_response('/%s: file not found.' % path, 404)
+  git = pygit2.Repository(repo)
+  head = git.lookup_reference("refs/heads/master").target
+  commit = git[head]
 
-    wt = git.lookup_reference("refs/heads/working").target
+  try:
+    entry = git_auto_get(git, commit.tree, path)
+    blob = git[entry.id]
+  except KeyError:
+    return make_response('/%s: file does not exist.' % path, 404)
 
-    git.create_commit('refs/heads/working',
-      pygit2.Signature("DELETE " + request.full_path, request.remote_addr + "@hoster"),
+  mime = magic.from_buffer(blob.data)
+  if mime is None:
+      mime = 'application/octet-stream'
+  else:
+      mime = mime.replace(' [ [', '')
+  res = make_response(blob.data)
+  res.headers['Content-Type'] = mime
+  return res
+
+@server_git.route('/_git/<string:repo>/<path:path>', methods=['PUT'])
+def put_path(repo, path):
+  repo = os.path.join(SERVER_REPO_PATH, repo)
+  if not os.path.isdir(repo):
+    return make_response('/%s: Unknown repo.' % repo, 404)
+
+  git = pygit2.Repository(repo)
+  head = git.lookup_reference("refs/heads/working").target
+  commit = git[head]
+
+  data = request.get_data()
+  encoding = request.args.get('encoding', '')
+  if encoding == 'base64':
+      data = data.decode('base64')
+
+  id = git.create_blob(data)
+  blob = git[id]
+
+  tb = git.TreeBuilder(commit.tree)
+  tree = git_auto_insert(git, tb, path, id, pygit2.GIT_FILEMODE_BLOB)
+  wt = git.lookup_reference("refs/heads/working").target
+
+  git.create_commit('refs/heads/working',
+    pygit2.Signature("PUT " + request.full_path, request.remote_addr + "@hoster"),
+    pygit2.Signature("hoster", "@hoster"),
+    '', tree, [wt])
+
+  return make_response("OK")
+
+
+@server_git.route('/_git/<string:repo>', methods=['POST'])
+def post_repo(repo):
+  repo = os.path.join(SERVER_REPO_PATH, repo)
+  if not os.path.isdir(repo):
+    return make_response('/%s: Unknown repo.' % repo, 404)
+
+  git = pygit2.Repository(repo)
+  headw = git.lookup_reference("refs/heads/working").target
+  commitw = git[headw]
+
+  head = git.lookup_reference("refs/heads/master").target
+
+  if commitw.tree != git[head].tree:
+    commit = git.create_commit('refs/heads/master',
+      pygit2.Signature("POST " + request.full_path, request.remote_addr + "@hoster"),
       pygit2.Signature("hoster", "@hoster"),
-      '', tree, [wt])
+      '', commitw.tree.id, [head])
 
-    return make_response("OK")
+  if git.branches['working'].target != head:
+    head = git.lookup_reference("refs/heads/master").target
+    git.branches['working'].delete()
+    git.branches.local.create("working", git[head])
+
+  return make_response("OK")
+
+
+@server_git.route('/_git/<string:repo>/<path:path>', methods=['DELETE'])
+def delete(repo, path):
+  repo = os.path.join(SERVER_REPO_PATH, repo)
+
+  git = pygit2.Repository(repo)
+  head = git.lookup_reference("refs/heads/working").target
+  commit = git[head]
+
+  tb = git.TreeBuilder(commit.tree)
+  tree = git_auto_delete(git, tb, path)
+  if not tree:
+    return make_response('/%s: file not found.' % path, 404)
+
+  wt = git.lookup_reference("refs/heads/working").target
+
+  git.create_commit('refs/heads/working',
+    pygit2.Signature("DELETE " + request.full_path, request.remote_addr + "@hoster"),
+    pygit2.Signature("hoster", "@hoster"),
+    '', tree, [wt])
+
+  return make_response("OK")
 
 

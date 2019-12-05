@@ -4,7 +4,7 @@ set -e
 
 docker exec -it hoster.test bash -c "rm -rf /repo/test"
 
-if [ "$(lib/fetch GET test)" = "[]" ]; then
+if [ "$(lib/fetch GET _git/test)" = "[]" ]; then
   echo "READY"
 else
   echo "FAIL"

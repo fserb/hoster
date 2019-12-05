@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+exec docker exec --tty hoster.test bash -c "$@"

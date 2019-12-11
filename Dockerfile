@@ -13,7 +13,8 @@ RUN apt-get update && \
   rm -rf /usr/share/doc && \
   rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --no-cache-dir setuptools supervisor flask waitress python-magic
+RUN pip3 install --no-cache-dir setuptools requests supervisor flask waitress \
+  python-magic
 
 ARG BUILD_ENV
 RUN if [ "${BUILD_ENV}" = "dev" ]; then apt-get update && \

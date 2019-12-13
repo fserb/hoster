@@ -7,10 +7,10 @@ ENV LANG C.UTF-8
 RUN apt-get update && \
   apt-get install -y --no-install-suggests --no-install-recommends \
     mime-support python3 python3-pip gnupg \
-    libmagic1 nginx bzip2 file python3-pygit2 fcgiwrap \
+    libmagic1 nginx-light bzip2 file python3-pygit2 fcgiwrap \
     libnginx-mod-http-fancyindex && \
   rm -f /etc/nginx/conf.d/default.conf && \
-  rm -rf /usr/share/doc && \
+  rm -rf /usr/share/doc /usr/share/vim /usr/share/common-licenses && \
   rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir setuptools requests supervisor flask waitress \

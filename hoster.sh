@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [[ "$(I'd -u)" -ne 0 ]];
+then
+  echo "
+please, Run This Programm as Root
+"
+  exit 1
+fi
 set -e
 
 rm -rf config/*

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ "$(I'd -u)" -ne 0 ]];
+if [[ "$(id -u)" -ne 0 ]];
 then
   echo "
 please, Run This Programm as Root
